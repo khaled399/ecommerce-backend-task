@@ -1,4 +1,5 @@
 import { Request, Response } from "express";
+import { Prisma } from "@prisma/client";
 import prisma from "../utils/prisma";
 
 // GET /products (all or filter by category)
@@ -65,12 +66,26 @@ export const getProductById = async (req: Request, res: Response) => {
 // POST /products
 export const createProduct = async (req: Request, res: Response) => {
   try {
-    const { name, price, category, image, available, quantity } = req.body;
+    const { id, name, price, category, image, available, quantity } = req.body;
+    
+    if (!id) {
+      return res.status(400).json({ error: "Product ID is required" });
+    }
+
     const newProduct = await prisma.product.create({
-      data: { name, price, category, image, available, quantity },
+      data: { 
+        id: Number(id),
+        name: name || null,
+        price: price ? new Prisma.Decimal(price) : null,
+        category: category || null,
+        image: image || null,
+        available: available ?? false,
+        quantity: quantity !== undefined ? Number(quantity) : 0,
+      },
     });
     res.status(201).json(newProduct);
   } catch (error) {
+    console.error("Error creating product:", error);
     res.status(500).json({ error: "Failed to create product" });
   }
 };
@@ -85,12 +100,16 @@ export const decrementQuantity = async (req: Request, res: Response) => {
       const product = await tx.product.findUnique({ where: { id } });
       if (!product) throw Object.assign(new Error("Not Found"), { code: 404 });
       // Respect manual availability flag: if unavailable, do not allow decrement
-      if (!product.available)
+      if (!product.available) {
         throw Object.assign(new Error("Unavailable"), { code: 409 });
-      if (product.quantity <= 0)
+      }
+      
+      const currentQuantity = product.quantity ?? 0;
+      if (currentQuantity <= 0) {
         throw Object.assign(new Error("Out of Stock"), { code: 409 });
+      }
 
-      const newQty = product.quantity - 1;
+      const newQty = currentQuantity - 1;
       const result = await tx.product.update({
         where: { id },
         data: {
