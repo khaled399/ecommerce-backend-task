@@ -1,20 +1,22 @@
 {
   "compilerOptions": {
-    "target": "ES2020", // إصدار JS الناتج
-    "module": "CommonJS", // نوع الموديول
-    "rootDir": "./src", // جذر الكود المصدر
-    "outDir": "./dist", // مكان الملفات بعد build
-    "strict": true, // تفعيل القواعد الصارمة
-    "esModuleInterop": true, // تسهيل الاستيراد من CommonJS
+    "target": "ES2020",
+    "module": "CommonJS",
+    "rootDir": ".",
+    "outDir": "./dist",
+    "strict": true,
+    "esModuleInterop": true,
     "forceConsistentCasingInFileNames": true,
-    "skipLibCheck": true
+    "skipLibCheck": true,
+    "composite": true,
+    "incremental": true
   },
   "include": [
-    "src/**/*", // كل ملفات المشروع
-    "prisma/**/*" // ملفات Prisma (مثل seed)
+    "src/**/*",
+    "prisma/**/*"
   ],
   "exclude": [
-    "node_modules", // تجاهل مجلد node_modules
-    "dist" // تجاهل مجلد البناء النهائي
+    "node_modules",
+    "dist"
   ]
 }
